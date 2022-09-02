@@ -1,11 +1,13 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/spf13/cobra"
 )
@@ -21,7 +23,35 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("ls called")
+		introLsMessages(FromPath)
+
+		client := &http.Client{}
+
+		reqURL := BaseURL + FromPath
+
+		req, err := http.NewRequest(http.MethodGet, reqURL, nil)
+		if err != nil {
+			panic(err)
+		}
+
+		req.Header.Set("Content-Type", "application/json; charset=utf8")
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+
+		jsonResponse, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+
+		var jsonData map[string]interface{}
+
+		json.Unmarshal([]byte(jsonResponse), &jsonData)
+
+		fmt.Println((jsonData["Responses"]))
+
+		defer resp.Body.Close()
 	},
 }
 
@@ -37,4 +67,12 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// lsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	lsCmd.Flags().StringVarP(&FromPath, "from", "f", "", "The path on your domain to link from")
+	lsCmd.MarkFlagRequired("from")
+}
+
+func introLsMessages(f string) {
+	fmt.Println("Retrieving from the server:")
+	fmt.Printf("\t- From Path: %v\n", f)
 }

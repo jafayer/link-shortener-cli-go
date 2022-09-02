@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -10,18 +9,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const BaseURL string = "https://ao4qyu2pr0.execute-api.us-east-1.amazonaws.com/default/LinkShortenerCLIMethods-LinkShortenerCLIMethods-TiijGWZnpMZ5/"
 
+var FromPath string
+var ToURL string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "link-shortener-cli-go",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "shorten",
+	Short: "A CLI utility for link shortening",
+	Long: `A CLI for interacting with a Link Shortening API.
+	
+	Perform CRUD operations with the add, del, and ls utilities.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -45,7 +44,4 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-
