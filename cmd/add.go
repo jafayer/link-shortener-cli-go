@@ -7,10 +7,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/spf13/cobra"
 )
+
+type Metadata struct {
+	HTTPStatusCode  uint8  `json:"httpStatusCode"`
+	RequestId       string `json:"requestId"`
+	Attempts        uint8  `json:"attempts"`
+	TotalRetryDelay uint8  `json:"totalRetryDelay"`
+}
+
+type BodyStruct struct {
+	Metadata Metadata `json:"$metadata"`
+}
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -56,6 +68,33 @@ var addCmd = &cobra.Command{
 		}
 
 		defer resp.Body.Close()
+
+		jsonBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+
+		var bodyMap map[string]string
+
+		err = json.Unmarshal([]byte(jsonBody), &bodyMap)
+		if err != nil {
+			panic(err)
+		}
+
+		metaString := bodyMap["body"]
+
+		var respData BodyStruct
+		err = json.Unmarshal([]byte(metaString), &respData)
+		if err != nil {
+			panic(err)
+		}
+
+		isSuccess := respData.Metadata.HTTPStatusCode == 200
+		hasAttempts := respData.Metadata.Attempts > 0
+
+		if isSuccess && hasAttempts {
+			fmt.Println("Successfully added!")
+		}
 
 	},
 }
