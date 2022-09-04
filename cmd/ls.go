@@ -13,6 +13,22 @@ import (
 	"github.com/spf13/viper"
 )
 
+type toURL struct {
+	Value string `json:"S"`
+}
+
+type redirectsTable struct {
+	ToURL toURL `json:"toURL"`
+}
+
+type response struct {
+	RedirectsTable []redirectsTable `json:"RedirectsTable"`
+}
+
+type responseBody struct {
+	Response response `json:"Responses"`
+}
+
 // lsCmd represents the ls command
 var lsCmd = &cobra.Command{
 	Use:   "ls",
@@ -54,14 +70,21 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			panic(err)
 		}
-
-		var jsonData map[string]interface{}
-
-		json.Unmarshal([]byte(jsonResponse), &jsonData)
-
-		fmt.Println((jsonData["Responses"]))
-
 		defer resp.Body.Close()
+
+		var jsonData responseBody
+
+		err = json.Unmarshal([]byte(jsonResponse), &jsonData)
+		if err != nil {
+			panic(err)
+		}
+
+		if len(jsonData.Response.RedirectsTable) < 1 {
+			fmt.Println("There was no link with that fromPath!")
+			return
+		}
+		fmt.Printf("\t- To URL:\t%v", jsonData.Response.RedirectsTable[0].ToURL.Value)
+
 	},
 }
 
@@ -84,5 +107,5 @@ func init() {
 
 func introLsMessages(f string) {
 	fmt.Println("Retrieving from the server:")
-	fmt.Printf("\t- From Path: %v\n", f)
+	fmt.Printf("\t- From Path:\t%v\n", f)
 }
