@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type Metadata struct {
@@ -34,6 +35,14 @@ var addCmd = &cobra.Command{
 		shorten add -f path -t https://example.com
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var Link string = viper.GetString("LINK")
+		var LinkNotSet bool = Link == ""
+
+		if LinkNotSet {
+			fmt.Println("Error: Cannot execute because link is not set")
+			fmt.Println("Please use `shorten config --link` to add a CLI shortener remote link")
+			return
+		}
 
 		introAddingMessages(FromPath, ToURL)
 
@@ -56,7 +65,7 @@ var addCmd = &cobra.Command{
 			panic(err)
 		}
 
-		req, err := http.NewRequest(http.MethodPut, BaseURL, bytes.NewBuffer(json_data))
+		req, err := http.NewRequest(http.MethodPut, Link, bytes.NewBuffer(json_data))
 		if err != nil {
 			panic(err)
 		}
@@ -113,6 +122,9 @@ func init() {
 	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	addCmd.Flags().StringVarP(&FromPath, "from", "f", "", "The path on your domain to link from")
 	addCmd.Flags().StringVarP(&ToURL, "to", "t", "", "The full URL to link to")
+	addCmd.MarkFlagRequired("from")
+	addCmd.MarkFlagRequired("to")
+	addCmd.MarkFlagsRequiredTogether("from", "to")
 }
 
 func introAddingMessages(f string, t string) {

@@ -4,15 +4,19 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"path"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-const BaseURL string = "https://ao4qyu2pr0.execute-api.us-east-1.amazonaws.com/default/LinkShortenerCLIMethods-LinkShortenerCLIMethods-TiijGWZnpMZ5/"
-
-var FromPath string
-var ToURL string
+var (
+	FromPath string
+	ToURL    string
+	cfgFile  string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -44,4 +48,37 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
+
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			panic(err)
+		}
+
+		if _, err := os.Stat(path.Join(home, ".ShortenConfig.yaml ")); err == nil {
+			// file exist
+		} else {
+			// file doesn't exist
+			_, err := os.Create(path.Join(home, ".ShortenConfig.yaml"))
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		viper.AddConfigPath(home)
+		viper.SetConfigType("yaml")
+		viper.SetConfigName(".ShortenConfig")
+		err = viper.ReadInConfig() // Find and read the config file
+		if err != nil {            // Handle errors reading the config file
+			panic(fmt.Errorf("fatal error config file: %w", err))
+		}
+	}
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+
 }

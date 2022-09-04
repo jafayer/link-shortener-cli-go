@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // lsCmd represents the ls command
@@ -23,11 +24,20 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var Link string = viper.GetString("LINK")
+		var LinkNotSet bool = Link == ""
+
+		if LinkNotSet {
+			fmt.Println("Error: Cannot execute because link is not set")
+			fmt.Println("Please use `shorten config --link` to add a CLI shortener remote link")
+			return
+		}
+
 		introLsMessages(FromPath)
 
 		client := &http.Client{}
 
-		reqURL := BaseURL + FromPath
+		reqURL := Link + FromPath
 
 		req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 		if err != nil {
