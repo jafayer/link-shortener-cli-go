@@ -1,4 +1,4 @@
-module github.com/jafayer/link-shortener-cli-go
+module github.com/jafayer/shorten
 
 go 1.19
 
