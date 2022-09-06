@@ -6,12 +6,13 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/jafayer/shorten/pkg/config"
 	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
 )
 
-var link string
+var newLink string
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
@@ -23,16 +24,21 @@ var configCmd = &cobra.Command{
 	
 	Supply the link flag to set a new link`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if link != "" {
-			fmt.Printf("Setting new CLI methods link to %v\n", link)
-			viper.Set("LINK", link)
+		rootLink := config.GetRootLink()
+		if rootLink != newLink && newLink != "" {
+			fmt.Printf("Setting new CLI methods link to %v\n", newLink)
+			viper.Set("LINK", newLink)
 			err := viper.WriteConfig()
 			if err != nil {
 				panic(err)
 			}
 		} else {
+			if !config.RootLinkIsSet() {
+				fmt.Println("\nCLI methods link is not set! use `shorten config --link <link>` to set it")
+			} else {
+				fmt.Printf("The current CLI methods link is: %v\n", rootLink)
+			}
 
-			fmt.Println("The current CLI methods link is:")
 		}
 	},
 }
@@ -49,5 +55,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	configCmd.Flags().StringVarP(&link, "link", "s", "", "Set the lambda root link")
+	configCmd.Flags().StringVarP(&newLink, "link", "s", "", "Set the lambda root link")
 }

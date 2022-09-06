@@ -10,8 +10,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/jafayer/shorten/pkg/config"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type Metadata struct {
@@ -35,12 +35,9 @@ var addCmd = &cobra.Command{
 		shorten add -f path -t https://example.com
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var Link string = viper.GetString("LINK")
-		var LinkNotSet bool = Link == ""
 
-		if LinkNotSet {
-			fmt.Println("Error: Cannot execute because link is not set")
-			fmt.Println("Please use `shorten config --link` to add a CLI shortener remote link")
+		config.ErrRootLinkNotSet()
+		if !config.RootLinkIsSet() {
 			return
 		}
 
@@ -65,7 +62,7 @@ var addCmd = &cobra.Command{
 			panic(err)
 		}
 
-		req, err := http.NewRequest(http.MethodPut, Link, bytes.NewBuffer(json_data))
+		req, err := http.NewRequest(http.MethodPut, config.GetRootLink(), bytes.NewBuffer(json_data))
 		if err != nil {
 			panic(err)
 		}

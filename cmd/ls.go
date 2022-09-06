@@ -9,8 +9,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/jafayer/shorten/pkg/config"
+
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type toURL struct {
@@ -40,12 +41,9 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var Link string = viper.GetString("LINK")
-		var LinkNotSet bool = Link == ""
 
-		if LinkNotSet {
-			fmt.Println("Error: Cannot execute because link is not set")
-			fmt.Println("Please use `shorten config --link` to add a CLI shortener remote link")
+		config.ErrRootLinkNotSet()
+		if !config.RootLinkIsSet() {
 			return
 		}
 
@@ -53,7 +51,7 @@ to quickly create a Cobra application.`,
 
 		client := &http.Client{}
 
-		reqURL := Link + FromPath
+		reqURL := config.GetRootLink() + FromPath
 
 		req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 		if err != nil {
