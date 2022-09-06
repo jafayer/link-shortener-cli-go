@@ -61,6 +61,7 @@ func init() {
 			// file exist
 		} else {
 			// file doesn't exist
+			fmt.Println("Creating config file!!")
 			_, err := os.Create(path.Join(home, ".ShortenConfig.yaml"))
 			if err != nil {
 				panic(err)
